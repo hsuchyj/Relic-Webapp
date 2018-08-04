@@ -1,0 +1,626 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.sideBlue 
+{
+    height: 100%; 
+    width: 80px; 
+    position: absolute; 
+    top: 0;
+    left: 0;
+    background-color: #00539f; 
+    overflow-x: hidden; 
+    padding-top: 20px;
+}
+
+.searchStyle
+{
+	display:none;
+	position: relative;
+	top:100px;
+    bottom: 200px;
+	left:300px;
+	z-index:5;
+}
+
+.tab
+{
+
+	border: none;
+	border-radius: 8px;
+	background-color: white;
+	display: inline-block;
+	font-size: 18px;
+	left:90px;
+	padding: 5px 30px 5px 5px;
+	position: absolute;
+	text-align: left;
+}
+
+.searchTab
+{
+top:90px;
+}
+
+.importTab
+{
+top:140px;
+}
+
+.tabHover:hover
+{
+	background-color: #f2f2f2;
+}
+
+.clearDiv
+{
+	width:40%;
+}
+
+.question
+{
+	position:relative;
+	z-index:4;
+}
+
+.answers
+{
+	position:relative;
+	font-size: 14px;
+	font-family:Arial;
+	padding-left:30px;
+	z-index:3;
+}
+
+.questionStyle
+{
+	border-radius: 4px;
+	position:relative;
+	padding:15px;
+	margin-top:30px;
+	border-width: 2px;
+	border-style:solid;
+	border-color: #d9d9d9;
+	z:index:2;
+}
+
+.idHidden
+{
+	display:none;
+}
+
+.searchBar
+{
+	display:inline;
+}
+
+.radioBlock
+{
+	display:none;
+	float:left;
+	padding:20px;
+	width:200px;
+	height:250px;
+	overflow-y:scroll;
+}
+
+
+.radioButtons
+{
+	 display:inline-block;
+	 margin: 10px 0 10px 0;
+	 transform: scale(1.5);
+}
+
+.skillSLOS
+{
+	width:350px !important;
+	height:250px;
+	overflow-y:scroll;
+}
+.units
+{
+display:block;
+}
+
+.filterTitle
+{
+
+}
+
+
+
+</style>
+<meta charset="UTF-8">
+<title>Relic</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+//assigns html of questions to divs
+
+var exportArray = [];
+
+
+function showQuestions(response)
+{
+	var result ="";
+			var ansCount = 0;
+			var ansLett = "";
+			var count = 0;
+			//if(document.getElementById("divId") === null)
+			//{
+			 $.each(response, function(index, questions){
+				result = "";
+				//console.log(questions);
+				
+				var quesId = questions.questionId;
+				//var newDiv = document.createElement('div');
+				//var quesId = questions.questionId;
+				//newDiv.id = 'divId'+count;
+				//newDiv.className = "searchStyle tabPage search questionStyle ";
+				//newDiv.style.display = "block";
+				//document.body.appendChild(newDiv);
+				
+				
+				//document.getElementById("searchBar").appendChild(newDiv);
+				result+=questions.questionText;
+				//have to add question class to imported html before other <p> are added
+				
+				$.each(questions.answers, function(index2, answer){
+					//console.log("this is an answer " + answer);
+					ansLett = String.fromCharCode('a'.charCodeAt() + ansCount);
+					result+="<pre class = 'answers'>"+ansLett+". "+answer+"</pre>";
+					ansCount++;
+				});
+				
+				//adds ques id as a <p>
+				result+= "<pre class = 'idHidden' id = "+quesId+">"+quesId+"</pre>";
+				ansCount = 0;
+				$("#divId"+count).html(result);
+				checkColor(count, quesId);
+				//try to merge the two below somehow to reduce class list
+				//adds id to question for exporting to array
+				//document.getElementById("divId"+count).classList.replace("id",quesId);
+				
+				//assigns all color switching parts to the same element by adding divId"number" to class list
+				var list = document.getElementById("divId"+count).getElementsByTagName('pre');
+				for (var i = 0; i < list.length; i++) 
+				{
+					list[i].classList.add("divId"+count);
+				}
+				
+				var listQues = document.getElementById("divId"+count).getElementsByTagName('p');
+				for (var i = 0; i < listQues.length; i++) 
+				{
+					listQues[i].classList.add("question");
+				}
+				count++;
+			  });
+			  
+}
+
+function checkColor(count, quesId)
+{
+	var cDiv = document.getElementById("divId"+count);
+	//if(exportArray.length > 0)
+	//{
+	var color = "white";
+	for(var i = 0; i < exportArray.length;i++)
+	{
+		console.log(exportArray[i]["questionId"] +" "+ quesId);
+		if(exportArray[i]["questionId"] == quesId)
+		{
+			color = "#ccffb3";
+		}
+	}
+	
+	cDiv.style.backgroundColor=color;
+	//}
+	
+}
+
+//working
+//checks array if entry is already in it if not removes it on click
+function checkArray(idName, qId)
+{
+	//check to see if id exists in array
+	//if not add the entry 
+	//not a more efficient way to find
+	var cDiv = document.getElementById(idName);
+	
+	
+	var quesArr = document.getElementById(idName).getElementsByClassName("question");
+	var quesText = "";
+	//adds text to one string
+	for(var i = 0; i < quesArr.length;i++)
+	{
+		quesText+=quesArr[i].innerText+"\n";
+	}
+	
+	var ansArr = document.getElementById(idName).getElementsByClassName("answers");
+	var ansText = "";
+	for(var i = 0; i < ansArr.length;i++)
+	{
+		ansText+=ansArr[i].innerText+"\n";
+	}
+	
+	//console.log(quesArr[0].innerText);
+
+	var removeIndex = -1;
+	var entry = {"questionId":qId, "questionText":quesText, "answerText":ansText};
+	
+	for(var i = 0; i < exportArray.length;i++)
+	{
+		if(exportArray[i]["questionId"] === qId)
+		{
+			removeIndex = i;
+		}
+	}
+	
+	if(removeIndex > -1)
+	{
+		cDiv.style.backgroundColor="white";
+		exportArray.splice(removeIndex,1);
+	}
+	else
+	{
+		cDiv.style.backgroundColor="#ccffb3";
+		exportArray.push(entry);
+	}
+	
+	//console.log(exportArray);
+	//document.getElementById("exportArray").value = exportArray;
+	//console.log(document.getElementById("exportArray").value);
+	
+	
+}
+
+
+
+//creates physical divs for questions
+function makeDivs(total)
+{
+	//starts from prev created divs
+	
+	
+				for(var count  = 0; count < total; count++)
+				{
+					if(document.getElementById('divId'+count)===null)
+					{
+						var clearDiv = document.createElement('div');
+						var newDiv = document.createElement('div');
+						clearDiv.id = 'clearDiv'+count;
+						clearDiv.className = "searchStyle tabPage search clearDiv";
+						newDiv.id = 'divId'+count;
+						newDiv.className = "tabPage search questionStyle divId"+count;
+						newDiv.style.display = "block";
+						clearDiv.style.display = "block";
+						clearDiv.appendChild(newDiv);
+						clearDiv.addEventListener('click', function (event) {
+								//name of clear div
+								var name = event.currentTarget.id;
+								var idName = document.getElementById(name).childNodes[0].id;
+								//var cDiv = document.getElementById(idName);
+								//cDiv.style.backgroundColor="#ccffb3";
+								//console.log(element[0]);
+								//console.log(name);//!!!!!!!!!!!!!!
+								//regular expression to get divId and the number
+								
+								//var idName = name.match(/divId\d/);
+								//gets all elements with the same divID to change colors of p with div
+								
+								//var elements = document.getElementsByClassName(idName[0]);
+								
+								//changes color of all elements included in div
+//fix coloring				
+//-----------------------------------------------------------------------------------------------------------------------						
+								/*
+								for (var i = 0; i < elements.length; i++) {
+									if(elements[i].style.backgroundColor === "rgb(204, 255, 179)")
+									{
+										elements[i].style.backgroundColor="white";
+									}
+									else
+									{
+										elements[i].style.backgroundColor="#ccffb3";
+									}
+								}
+								*/
+//-----------------------------------------------------------------------------------------------------------------------								
+								
+								//add method to add questions text and answers to array
+								//copies html of clicked element
+								
+								//gets id of the question which is stored in a <p>
+								//idhidden only used for id of ques so at [0]
+								var qId = document.getElementById(idName).getElementsByClassName('idHidden')[0].id;
+								
+								//use for duplicating divs in another tab
+								var clickedDiv = $("#"+idName).html();
+								console.log(clickedDiv);
+								
+								//idName[0]
+								checkArray(idName, qId);
+								//console.log(clickedDiv);			
+								
+						});
+						document.body.appendChild(clearDiv);
+					}
+					//else if(document.getElementById('divId'+count).style.display === "none")
+					//{
+						//document.getElementById('divId'+count).style.display = "block";
+					//}
+				}
+}
+
+//gets rid of excess divs on new search if too many
+function eraseDivs(curr, total)
+{
+	//starts from prev created divs
+	//console.log(diff + " " + total);
+				for(var count = total; count > curr; count--)
+				{
+					//if(document.getElementById('divId'+count)===null)
+					//{
+						var foundDiv = document.getElementById('clearDiv'+count);
+						//newDiv.id = 'divId'+count;
+						//newDiv.className = "searchStyle tabPage search questionStyle ";
+						document.body.removeChild(foundDiv);
+						//document.body.remove(newDiv);
+					//}
+				}
+}
+
+
+
+
+$(document).ready(function(e) {
+var $form = $('#searchBar');
+var maxDivs = -1;
+$form.submit(function(e){
+e.preventDefault();
+   $.ajax({
+		type: 'POST',
+		url:$form.attr('action'),
+		data:$form.serialize(),
+		dataType:'json',
+		success:
+		
+	   function(response)
+       {
+			console.log(response);
+			var len = Object.keys(response).length;
+			//var diff = (len - maxDivs) - 1;
+			//var eraseDiff = (maxDivs - len);
+			if(maxDivs === -1)
+			{
+				makeDivs(len);
+			}
+			else if(len < maxDivs)
+			{
+				eraseDivs(len-1,maxDivs-1);
+			}
+			else if(len > maxDivs)
+			{
+				makeDivs(len);
+			}
+			maxDivs = len;
+			showQuestions(response);
+       }
+	   
+    });
+	return false;
+});
+
+
+$('#exportExam').submit(function(e){
+	e.preventDefault();
+	var arr = JSON.stringify(exportArray);
+	//console.log(arr);
+   $.ajax({
+		type: 'POST',
+		url:$('#exportExam').attr('action'),
+		data:{myData: arr},
+		dataType:'json',
+       success:
+	   function(response)
+       {
+			alert("exam has been exported");
+       },
+	   
+	   error:function(f)
+	   {
+               console.log("export exam has error");
+			   alert(f.responseText);
+		}
+	
+    });
+	return false;
+});
+
+
+});
+</script>
+</head>
+
+
+
+<body>
+<div class="sideBlue">
+</div>
+
+<button onclick = "chooseDisplay(this.id)" class = "tab searchTab tabHover" id = "search">
+Search
+</button>
+
+<button onclick = "chooseDisplay(this.id)" class = "tab importTab tabHover" id = "import">
+Labeling
+</button>
+
+<script>
+function chooseDisplay(click_id) {
+    var searchElements = document.getElementsByClassName("tabPage");
+	for(var i=0; i<searchElements.length; i++) 
+	{	
+		//checks to see if tab open matches elements open
+		if(searchElements[i].classList.contains(click_id))
+		{
+			searchElements[i].style.display = "block";
+		}
+		else
+		{
+			searchElements[i].style.display = "none";
+		}
+	}
+	
+}
+
+
+function displayButtons(select)
+{
+	var val = select.value;
+	var arr = document.getElementsByClassName("radioBlock");
+	console.log("hello");
+	for(var i =0; i < arr.length; i++)
+	{
+		console.log(arr[i]);
+		if(arr[i].classList.contains(val) || arr[i].classList.contains("units"))
+		{
+			arr[i].style.display = "block";
+			//document.getElementById(val+"sect1").style.display = "none";
+		}
+		else
+		{
+			arr[i].style.display = "none";
+		}
+	}
+	//console.log("gekk");
+}
+
+</script>
+
+<form action = "search.php" class= "searchStyle tabPage search" id = "searchBar" method = "post">
+  <p class = "searchBar" ><b>Question keyword search:</b></p>
+  <input name="search" type="text" class = "searchBar">
+  <button name = "button" type = "submit" class = "searchBar">Search</button>
+  <br>
+  <p class = "searchBar"><b>Search by:</b></p> 
+  <select name="Category" class = "searchBar"> 
+    <option value = "Unit">Unit</option>
+    <option value  = "Unit SLO">Unit SLO</option>
+    <option value	= "Skill">Skill</option>
+    <option value = "Skill SLO">Skill SLO</option>
+  </select>
+  <br>
+  <div id = "units" class = "radioBlock units">
+  <p class = "searchBar"><b>Unit:</b></p>
+  <br>
+  
+  <input type="radio" value="unit1" id = "unit1Choice" onchange = "displayButtons(this);" name = "unit" class = "radioButtons">
+    <label for="unit1Choice">Simple Python Data</label>
+	<br>
+	<input type="radio" value="unit2" id = "unit2Choice"  onchange = "displayButtons(this);" name = "unit" class = "radioButtons">
+    <label for="unit2Choice">Functions</label>
+	<br>
+	<input type="radio" value="unit3" id = "unit3Choice" onchange = "displayButtons(this);" name = "unit" class = "radioButtons">
+    <label for="unit3Choice">Selection</label>
+	<br>
+	<input type="radio" value="unit4" id = "unit4Choice" onchange = "displayButtons(this);" name = "unit" class = "radioButtons">
+    <label for="unit4Choice">Iteration</label>
+	</div>
+
+	<div id = "unit1sect1" class = "radioBlock unit1">
+	<p class = "searchBar"><b>Unit SLOs:</b></p>
+	<br>
+		<input type="radio" value="slo1" id = "slo1Choice" name = "unit1SLO" class = "radioButtons">
+		<label for="slo1Choice">Write a script/program that asks a user for input values from the keyboard, performs a mathematical computation and displays the result to the screen.</label>
+	</div>
+	
+	
+	<div id = "unit1sect2" class = "radioBlock unit1">
+	<p class = "searchBar"><b>Skills:</b></p>
+	<br>
+	<input type="checkbox" value="algorithms" id = "skills1Choice1" name = "skills1" class = "radioButtons unit1">
+    <label for="skills1Choice1">Algorithms</label>
+	<br>
+	<input type="checkbox" value="variables" id = "skills1Choice2" name = "skills1" class = "radioButtons unit1">
+    <label for="skills1Choice2">Variables</label>
+	<br>
+	<input type="checkbox" value="data types - float, int, string" id = "skills1Choice3" name = "skills1" class = "radioButtons unit1">
+    <label for="skills1Choice3">Data types - float, int, string</label>
+	<br>
+	<input type="checkbox" value="operators +, - ,*, /, **, //, %" id = "skills1Choice4" name = "skills1" class = "radioButtons unit1">
+    <label for="skills1Choice4">Operators +, - ,*, /, **, //, %</label>
+	<br>
+	<input type="checkbox" value="statements" id = "skills1Choice5" name = "skills1" class = "radioButtons unit1">
+    <label for="skills1Choice5">Statements</label>
+	<br>
+	<input type="checkbox" value="input function" id = "skills1Choice6" name = "skills1" class = "radioButtons unit1">
+    <label for="skills1Choice6">Input function</label>
+	<br>
+	<input type="checkbox" value="print function" id = "skills1Choice7" name = "skills1" class = "radioButtons unit1">
+    <label for="skills1Choice7">Print function</label>
+	<br>
+	</div>
+	
+	<div id = "unit1sect3" class = "radioBlock unit1 skillSLOS">
+	<p class = "searchBar"><b>Skill SLOs:</b></p>
+	<br>
+	<input type="checkbox" value="write algorithm for solving simple mathematical problems" id = "skillSLO1Choice1" name = "skillsSLO1" class = "radioButtons unit1">
+    <label for="skillSLO1Choice1">Write algorithm for solving simple mathematical problems</label>
+	<br>
+	<input type="checkbox" value="understand the difference between an algorithm and a program" id = "skillSLO1Choice2" name = "skillsSLO1" class = "radioButtons unit1">
+    <label for="skillSLO1Choice2">Understand the difference between an algorithm and a program</label>
+	<br>
+	<input type="checkbox" value="identify invalid variable names" id = "skillSLO1Choice3" name = "skillsSLO1" class = "radioButtons unit1">
+    <label for="skillSLO1Choice3">Identify invalid variable names</label>
+	<br>
+	<input type="checkbox" value="choose meaningful variable names" id = "skillSLO1Choice4" name = "skillsSLO1" class = "radioButtons unit1">
+    <label for="skillSLO1Choice4">Choose meaningful variable names</label>
+	<br>
+	<input type="checkbox" value="identify data types" id = "skillSLO1Choice5" name = "skillsSLO1" class = "radioButtons unit1">
+    <label for="skillSLO1Choice5">Identify data types</label>
+	<br>
+	<input type="checkbox" value="use int(), float(), string() to cast" id = "skillSLO1Choice6" name = "skillsSLO1" class = "radioButtons unit1">
+    <label for="skillSLO1Choice6">Use int(), float(), string() to cast</label>
+	<br>
+	<input type="checkbox" value="evaluate expressions containing operators found under skills" id = "skillSLO1Choice7" name = "skillsSLO1" class = "radioButtons unit1">
+    <label for="skillSLO1Choice7">Evaluate expressions containing operators found under skills</label>
+	<br>
+	<input type="checkbox" value="understand the difference beween floating point and integer division" id = "skillSLO1Choice8" name = "skillsSLO1" class = "radioButtons unit1">
+    <label for="skillSLO1Choice8">Understand the difference beween floating point and integer division</label>
+	<br>
+	<input type="checkbox" value="convert a mathematical formula into a Python expression" id = "skillSLO1Choice9" name = "skillsSLO1" class = "radioButtons unit1">
+    <label for="skillSLO1Choice9">Convert a mathematical formula into a Python expression</label>
+	<br>
+	<input type="checkbox" value="assign a value to a variable" id = "skillSLO1Choice10" name = "skillsSLO1" class = "radioButtons unit1">
+    <label for="skillSLO1Choice10">Assign a value to a variable</label>
+	<br>
+	<input type="checkbox" value="'='  - understand assignment vs mathematical equals" id = "skillSLO1Choice11" name = "skillsSLO1" class = "radioButtons unit1">
+    <label for="skillSLO1Choice11">'='  - Understand assignment vs mathematical equals</label>
+	<br>
+	<input type="checkbox" value="determine the value of variables after sequence of assignment statements" id = "skillSLO1Choice12" name = "skillsSLO1" class = "radioButtons unit1">
+    <label for="skillSLO1Choice12">Determine the value of variables after sequence of assignment statements</label>
+	<br>
+	<input type="checkbox" value="use print statements" id = "skillSLO1Choice13" name = "skillsSLO1" class = "radioButtons unit1">
+    <label for="skillSLO1Choice13">Use print statements</label>
+	</div>
+	
+	
+	
+
+	
+</form>
+
+<form action="exportExam.php" class = "searchStyle tabPage search" id = "exportExam" method="post">
+	<input name="exportArray" id = "exportArray" value = "" type="hidden"></input>
+  <input type="submit" value = "Export">
+</form>
+
+<!--<div id="responseDiv" class= "searchStyle tabPage search"></div>-->
+<div id="importPage" class= "searchStyle tabPage import"><h1>import questions from canvas!</h1></div>
+</body>
+
+</html>

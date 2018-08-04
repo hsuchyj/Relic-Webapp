@@ -1,0 +1,33 @@
+1) some_list = ["True", 10, "Meow", 3.0]
+WhatÂ valueÂ does the following expression evaluate to? ________________
+some_list[1:3]
+a. [10, "Meow"]
+b. [10,"Meow"]
+2) What is the data type that this expression evaluates to?
+input("Enter a whole number")
+a. bool
+b. float
+c. str
+d. int
+e. assignment
+3) What is the value of the following expression if x=True and y=False?
+not x or y and not y or x
+a. True
+b. "True"
+c. False
+d. "False"
+e. Error
+4) What is value of the following expressions?
+5//2+3-6*2
+a. -2
+b. -4
+c. -7
+d. -10
+e. -11
+5) What is the datatype that this expression evaluates to?
+6.5 + 1.3 == 4.5
+a. bool
+b. float
+c. str
+d. int
+e. True
